@@ -40,7 +40,7 @@ x = 800 // 2
 y= 600 //2
 frame = 0
 dir_x = 0
-dir_y =0
+dir_y = 0
 
 while running:
     clear_canvas()
