@@ -2,7 +2,7 @@
 import math
 
 from pico2d import load_image, get_time
-from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP
+from sdl2 import SDL_KEYDOWN, SDLK_SPACE, SDLK_RIGHT, SDLK_LEFT, SDL_KEYUP, SDLK_a
 
 
 def space_down(e):
@@ -28,13 +28,19 @@ def left_down(e):
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
+def autorun_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+
+def autorun_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
+
 
 class AutoRun:
     @staticmethod
     def enter(boy, e):
-        boy.dir, boy.action = 1, 1
-        boy.frame = 0
-        boy.start_time = get_time()
+        if autorun_down(e) or autorun_up(e):
+            boy.dir, boy.action = 0, 0
+            boy.start_time = get_time()
 
     @staticmethod
     def exit(boy, e):
@@ -52,11 +58,11 @@ class AutoRun:
             boy.action = 0
 
         if get_time() - boy.start_time > 5.0:
-            boy.state_machine.start(('START', 0))
+            boy.state_machine.handle_event(('TIME_OUT', 0))
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 200, boy.x, boy.y)
+        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
 
 
 class Run:
@@ -136,9 +142,10 @@ class StateMachine:
         self.boy = boy
         self.cur_state = Idle
         self.table = {
-            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep},
+            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep, autorun_down: AutoRun, autorun_up: AutoRun},
             Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
-            Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle}
+            Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle},
+            AutoRun: {autorun_down: Idle, autorun_up: Idle}
         }
 
     def start(self):
@@ -173,11 +180,7 @@ class Boy:
         self.state_machine.update()
 
     def handle_event(self, event):
-        if event == 'a':
-            if isinstance(self.state_machine.cur_state, Idle):
-                self.state_machine.handle_event(('INPUT', 'a'))
-        else:
-            self.state_machine.handle_event(('INPUT', event))
+        self.state_machine.handle_event(('INPUT', event))
 
     def draw(self):
         self.state_machine.draw()
