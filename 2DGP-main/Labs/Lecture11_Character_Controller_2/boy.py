@@ -56,7 +56,7 @@ class AutoRun:
             boy.action = 0
 
         if get_time() - boy.start_time > 5.0:
-            boy.state_machine.start()
+            boy.state_machine.handle_event(('TIME_OUT', 0))
 
     @staticmethod
     def draw(boy):
@@ -144,7 +144,7 @@ class StateMachine:
                    autorun_down: AutoRun},
             Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle},
-            AutoRun: {autorun_down: Idle, right_down: Run, left_down: Run, right_up: Run, left_up: Run}
+            AutoRun: {autorun_down: Idle, right_down: Run, left_down: Run, right_up: Run, left_up: Run, time_out_3: Idle}
         }
 
     def start(self):
