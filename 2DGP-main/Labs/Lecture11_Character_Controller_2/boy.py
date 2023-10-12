@@ -28,6 +28,7 @@ def left_down(e):
 def left_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LEFT
 
+
 def autorun_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
@@ -55,11 +56,11 @@ class AutoRun:
             boy.action = 0
 
         if get_time() - boy.start_time > 5.0:
-            boy.state_machine.handle_event(('TIME_OUT', 0))
+            boy.state_machine.start()
 
     @staticmethod
     def draw(boy):
-        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y)
+        boy.image.clip_draw(boy.frame * 100, boy.action * 100, 100, 100, boy.x, boy.y + 10, 150, 150)
 
 
 class Run:
@@ -139,10 +140,11 @@ class StateMachine:
         self.boy = boy
         self.cur_state = Idle
         self.table = {
-            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep, autorun_down: AutoRun},
+            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep,
+                   autorun_down: AutoRun},
             Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle},
-            AutoRun: {autorun_down: Idle}
+            AutoRun: {autorun_down: Idle, right_down: Run, left_down: Run, right_up: Run, left_up: Run}
         }
 
     def start(self):
