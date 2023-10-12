@@ -31,15 +31,12 @@ def left_up(e):
 def autorun_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
 
-def autorun_up(e):
-    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_a
-
 
 class AutoRun:
     @staticmethod
     def enter(boy, e):
-        if autorun_down(e) or autorun_up(e):
-            boy.dir, boy.action = 0, 0
+        if autorun_down(e):
+            boy.dir, boy.action = -1, 0
             boy.start_time = get_time()
 
     @staticmethod
@@ -142,10 +139,10 @@ class StateMachine:
         self.boy = boy
         self.cur_state = Idle
         self.table = {
-            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep, autorun_down: AutoRun, autorun_up: AutoRun},
+            Idle: {right_down: Run, left_down: Run, left_up: Run, right_up: Run, time_out_3: Sleep, autorun_down: AutoRun},
             Run: {right_down: Idle, left_down: Idle, right_up: Idle, left_up: Idle},
             Sleep: {right_down: Run, left_down: Run, right_up: Run, left_up: Run, space_down: Idle},
-            AutoRun: {autorun_down: Idle, autorun_up: Idle}
+            AutoRun: {autorun_down: Idle}
         }
 
     def start(self):
